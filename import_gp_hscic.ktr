@@ -162,15 +162,19 @@
   <hop> <from>Has address 3_5</from><to>Remove address3 4 5</to><enabled>Y</enabled> </hop>
   <hop> <from>Concat ad1 and 2</from><to>reorder</to><enabled>Y</enabled> </hop>
   <hop> <from>reorder</from><to>Remove address3 4 5</to><enabled>Y</enabled> </hop>
-  <hop> <from>Remove address3 4 5</from><to>Lookup existing GPs</to><enabled>Y</enabled> </hop>
   <hop> <from>Split name</from><to>Concat other first name</to><enabled>Y</enabled> </hop>
   <hop> <from>Concat other first name</from><to>Remove name padding</to><enabled>Y</enabled> </hop>
   <hop> <from>Remove name padding</from><to>Has address 5</to><enabled>Y</enabled> </hop>
   <hop> <from>Has Address 4</from><to>Has address3</to><enabled>Y</enabled> </hop>
   <hop> <from>Has address3</from><to>address 3 to county</to><enabled>Y</enabled> </hop>
   <hop> <from>address 3 to county</from><to>address2 to city</to><enabled>Y</enabled> </hop>
-  <hop> <from>Has address3</from><to>address 2 to county</to><enabled>Y</enabled> </hop>
   <hop> <from>address 2 to county</from><to>address2 to city</to><enabled>Y</enabled> </hop>
+  <hop> <from>Remove address3 4 5</from><to>buffer</to><enabled>Y</enabled> </hop>
+  <hop> <from>buffer</from><to>Lookup existing GPs</to><enabled>Y</enabled> </hop>
+  <hop> <from>Has address3</from><to>Has address 2</to><enabled>Y</enabled> </hop>
+  <hop> <from>Has address 2</from><to>address 2 to county</to><enabled>Y</enabled> </hop>
+  <hop> <from>Has address 2</from><to>address 1 to county and city</to><enabled>Y</enabled> </hop>
+  <hop> <from>address 1 to county and city</from><to>clear address2</to><enabled>Y</enabled> </hop>
   </order>
   <step>
     <name>Has Address 4</name>
@@ -183,7 +187,7 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-<send_true_to>address4 to county</send_true_to>
+<send_true_to>Select values</send_true_to>
 <send_false_to>Has address3</send_false_to>
     <compare>
 <condition>
@@ -441,8 +445,8 @@
     </lookup>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>561</xloc>
-      <yloc>1434</yloc>
+      <xloc>570</xloc>
+      <yloc>1433</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1335,8 +1339,8 @@
       </remove>      <remove>        <name>address5</name>
       </remove>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>804</xloc>
-      <yloc>989</yloc>
+      <xloc>816</xloc>
+      <yloc>1041</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1721,8 +1725,8 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-<send_true_to>address 3 to county</send_true_to>
-<send_false_to>address 2 to county</send_false_to>
+<send_true_to>Select values</send_true_to>
+<send_false_to>Has address 2</send_false_to>
     <compare>
 <condition>
  <negated>N</negated>
@@ -1813,8 +1817,130 @@
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>1073</xloc>
-      <yloc>644</yloc>
+      <xloc>1084</xloc>
+      <yloc>726</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>buffer</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>&#x25;&#x25;java.io.tmpdir&#x25;&#x25;</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>Y</unique_rows>
+    <fields>
+      <field>
+        <name>org_code</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+        <presorted>N</presorted>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>818</xloc>
+      <yloc>1114</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Has address 2</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<send_true_to>address 2 to county</send_true_to>
+<send_false_to>address 1 to county and city</send_false_to>
+    <compare>
+<condition>
+ <negated>N</negated>
+ <conditions>
+  <condition>
+   <negated>N</negated>
+   <leftvalue>address2</leftvalue>
+   <function>IS NOT NULL</function>
+   <rightvalue/>
+   </condition>
+  <condition>
+   <negated>N</negated>
+   <operator>AND</operator>
+   <leftvalue>address2</leftvalue>
+   <function>&#x3c;&#x3e;</function>
+   <rightvalue/>
+   <value><name>constant</name><type>String</type><text/><length>-1</length><precision>-1</precision><isnull>Y</isnull><mask/></value>   </condition>
+  </conditions>
+ </condition>
+    </compare>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1074</xloc>
+      <yloc>639</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>address 1 to county and city</name>
+    <type>StringOperations</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>address1</in_stream_name>
+        <out_stream_name>county</out_stream_name>
+        <trim_type>none</trim_type>
+        <lower_upper>none</lower_upper>
+        <padding_type>none</padding_type>
+        <pad_char/>
+        <pad_len/>
+        <init_cap>no</init_cap>
+        <mask_xml>none</mask_xml>
+        <digits>none</digits>
+        <remove_special_characters>none</remove_special_characters>
+      </field>
+      <field>
+        <in_stream_name>address1</in_stream_name>
+        <out_stream_name>city</out_stream_name>
+        <trim_type>none</trim_type>
+        <lower_upper>none</lower_upper>
+        <padding_type>none</padding_type>
+        <pad_char/>
+        <pad_len/>
+        <init_cap>no</init_cap>
+        <mask_xml>none</mask_xml>
+        <digits>none</digits>
+        <remove_special_characters>none</remove_special_characters>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1249</xloc>
+      <yloc>821</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
